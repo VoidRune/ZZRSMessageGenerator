@@ -5,6 +5,7 @@
 #ifndef HTTPREQUEST_HPP
 #define HTTPREQUEST_HPP
 
+#include <iostream>
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
@@ -1141,7 +1142,8 @@ namespace http
             const auto stopTime = std::chrono::steady_clock::now() + timeout;
 
             if (uri.scheme != "http")
-                throw RequestError{"Only HTTP scheme is supported"};
+                std::cout << "Only HTTP scheme is supported" << std::endl;
+                //throw RequestError{"Only HTTP scheme is supported"};
 
             addrinfo hints = {};
             hints.ai_family = getAddressFamily(internetProtocol);
@@ -1152,9 +1154,11 @@ namespace http
             addrinfo* info;
             if (getaddrinfo(uri.host.c_str(), port, &hints, &info) != 0)
 #if defined(_WIN32) || defined(__CYGWIN__)
-                throw std::system_error{WSAGetLastError(), winsock::errorCategory, "Failed to get address info of " + uri.host};
+                std::cout << WSAGetLastError() << "Failed to get address info of " << uri.host << std::endl;
+                //throw std::system_error{WSAGetLastError(), winsock::errorCategory, "Failed to get address info of " + uri.host};
 #else
-                throw std::system_error{errno, std::system_category(), "Failed to get address info of " + uri.host};
+                std::cout << WSAGetLastError() << "Failed to get address info of " << uri.host << std::endl;
+                //throw std::system_error{errno, std::system_category(), "Failed to get address info of " + uri.host};
 #endif // defined(_WIN32) || defined(__CYGWIN__)
 
             const std::unique_ptr<addrinfo, decltype(&freeaddrinfo)> addressInfo{info, freeaddrinfo};
@@ -1237,7 +1241,8 @@ namespace http
                             if (fieldValue == "chunked")
                                 chunkedResponse = true;
                             else
-                                throw ResponseError{"Unsupported transfer encoding: " + fieldValue};
+                                std::cout << "Unsupported transfer encoding: " << fieldValue << std::endl;
+                                //throw ResponseError{"Unsupported transfer encoding: " + fieldValue};
                         }
                         else if (fieldName == "content-length")
                         {
@@ -1284,7 +1289,8 @@ namespace http
                                     if (responseData.size() < 2) break;
                                     
                                     if (!std::equal(crlf.begin(), crlf.end(), responseData.begin()))
-                                        throw ResponseError{"Invalid chunk"};
+                                        std::cout << "Invalid chunk" << std::endl;
+                                        //throw ResponseError{"Invalid chunk"};
 
                                     removeCrlfAfterChunk = false;
                                     responseData.erase(responseData.begin(), responseData.begin() + 2);

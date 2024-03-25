@@ -1,17 +1,8 @@
-﻿  Application.cpp
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Application.cpp(117,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  ClientLayer.cpp
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_glfw.cpp
-  imgui_impl_opengl3.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
+﻿  ClientLayer.cpp
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(59,50): warning C4101: 'e': unreferenced local variable
   main.cpp
-  glad.c
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 2601 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Previous IPDB and IOBJ mismatch, fall back to full compilation.
+  All 2715 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   MessageGenerator.vcxproj -> D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\x64\Release\MessageGenerator.exe
