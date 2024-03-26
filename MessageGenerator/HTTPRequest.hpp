@@ -1189,10 +1189,13 @@ namespace http
                 sendData += size;
             }
 
+            Response response;
+            return response;
+
             std::array<std::uint8_t, 4096> tempBuffer;
             constexpr std::array<std::uint8_t, 2> crlf = {'\r', '\n'};
             constexpr std::array<std::uint8_t, 4> headerEnd = {'\r', '\n', '\r', '\n'};
-            Response response;
+            //Response response;
             std::vector<std::uint8_t> responseData;
             bool parsingBody = false;
             bool contentLengthReceived = false;

@@ -41,8 +41,7 @@ void ClientLayer::OnUpdate(float dt)
             std::vector<int> dummy(m_GeneratorCount);
             std::for_each(std::execution::par_unseq, dummy.begin(), dummy.end(), [&](int a)
                 {
-                    try
-                    {
+
                         // you can pass http::InternetProtocol::V6 to Request to make an IPv6 request
                         http::Request request{ m_RequestAddress };
 
@@ -54,12 +53,7 @@ void ClientLayer::OnUpdate(float dt)
                         // send a get request
                         //const auto response = request.send("GET");
 
-                        m_ConsoleText = std::string{ response.body.begin(), response.body.end() };
-                    }
-                    catch (const std::exception& e)
-                    {
-                        //m_ConsoleText = std::string("Request failed, error: ") + e.what();
-                    }
+                        //m_ConsoleText = std::string{ response.body.begin(), response.body.end() };
                 });
 
             //for (size_t i = 0; i < m_GeneratorCount; i++)
