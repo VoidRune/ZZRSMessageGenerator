@@ -1,4 +1,5 @@
 #include "ClientLayer.h"
+#include "Random.h"
 #include "dependencies/imgui-docking/imgui.h"
 
 #define WIN32
@@ -24,7 +25,8 @@ std::vector<char> g_FlushBuffer(20 * 1024);
 class Generator
 {
 public:
-    Generator() :
+    Generator(uint32_t id) :
+        Id(id),
         Socket(g_Context)
     {
 
@@ -76,6 +78,7 @@ public:
         //    });
     }
 
+    uint32_t Id;
     asio::ip::tcp::socket Socket;
 };
 
@@ -121,7 +124,7 @@ void ClientLayer::OnUpdate(float dt)
         {
             for (size_t i = 0; i < m_ConnectGeneratorCount; i++)
             {
-                Generator gen;
+                Generator gen(g_Generators.size());
                 if(gen.Connect(m_Address, m_Port))
                     g_Generators.push_back(std::move(gen));
                 else
@@ -196,21 +199,31 @@ void ClientLayer::OnUpdate(float dt)
 
             auto start = std::chrono::high_resolution_clock::now();
 
-            std::string request =
+            //std::string request =
+            //    "POST /index.html HTTP/1.1\r\n"
+            //    "Host: example.com\r\n"
+            //    "Content-Type: application/x-www-form-urlencoded\r\n"
+            //    "Content-Length: 23\r\n"
+            //    "\r\n"
+            //    "id=1&timestep=2&value=3\r\n\r\n";
+
+
+            std::string requestTemplate =
                 "POST /index.html HTTP/1.1\r\n"
                 "Host: example.com\r\n"
                 "Content-Type: application/x-www-form-urlencoded\r\n"
-                "Content-Length: 23\r\n"
-                "\r\n"
-                "id=1&timestep=2&value=3\r\n\r\n";
-
-            auto requestBuffer = asio::buffer(request.data(), request.size());
+                "Content-Length: ";
 
             for (auto& g : g_Generators)
             {
                 for (size_t i = 0; i < m_RequestCount; i++)
                 {
-                    g.Socket.write_some(requestBuffer, g_Ec);
+                    std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Float()) + "\r\n\r\n";
+                    std::string send = requestTemplate + std::to_string(dataString.size() - 4) + "\r\n\r\n" + dataString;
+                    
+                    asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
+
+                    //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
 
                     if (g_Ec)
                     {

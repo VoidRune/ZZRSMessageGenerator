@@ -1,7 +1,13 @@
 ﻿  ClientLayer.cpp
-  main.cpp
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(38,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(40,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(127,50): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+  Random.cpp
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(38,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(40,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
   Generating code
-  Previous IPDB and IOBJ mismatch, fall back to full compilation.
-  All 3208 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  17 of 3236 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
+    4 functions were new in current compilation
+    41 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   MessageGenerator.vcxproj -> D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\x64\Release\MessageGenerator.exe
