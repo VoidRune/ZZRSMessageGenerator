@@ -17,6 +17,7 @@ private:
 	std::string m_ConsoleText = "";
 	bool m_FlushPeriodically = false;
 	int32_t m_RequestCount = 1;
-	std::string m_MessageBody = "Hello world!";
+	bool m_UseCustomRequestBody = false;
+	std::string m_CustomRequestBody = "Hello world!";
 	std::string m_TimeTaken = "Time taken: 0";
 };

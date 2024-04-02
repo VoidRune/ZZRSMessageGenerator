@@ -86,6 +86,13 @@ std::vector<Generator> g_Generators;
 
 void ClientLayer::OnAttach()
 {
+    m_CustomRequestBody =
+        "POST /report HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "\r\n"
+        "id=1&timestamp=2&value=3";
+
     g_ContextThread = std::thread([&]() { g_Context.run(); });
 }
 
@@ -208,21 +215,30 @@ void ClientLayer::OnUpdate(float dt)
             //    "id=1&timestep=2&value=3\r\n\r\n";
 
 
+            //std::string requestTemplate =
+            //    "POST /report HTTP/1.1\r\n"
+            //    "Host: example.com\r\n"
+            //    "Content-Type: application/x-www-form-urlencoded\r\n"
+            //    "Content-Length: ";
+
             std::string requestTemplate =
-                "POST /index.html HTTP/1.1\r\n"
+                "POST /report HTTP/1.1\r\n"
                 "Host: example.com\r\n"
                 "Content-Type: application/x-www-form-urlencoded\r\n"
-                "Content-Length: ";
+                "\r\n";
 
             for (auto& g : g_Generators)
             {
                 for (size_t i = 0; i < m_RequestCount; i++)
                 {
-                    std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Float()) + "\r\n\r\n";
-                    std::string send = requestTemplate + std::to_string(dataString.size() - 4) + "\r\n\r\n" + dataString;
-                    
-                    asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
+                    std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Float());
+                    //std::string send = requestTemplate + std::to_string(dataString.size() - 4) + "\r\n\r\n" + dataString;
+                    std::string send = requestTemplate + dataString;
 
+                    if (m_UseCustomRequestBody)
+                        asio::write(g.Socket, asio::buffer(m_CustomRequestBody.data(), m_CustomRequestBody.size()), g_Ec);
+                    else
+                        asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
                     //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
 
                     if (g_Ec)
@@ -267,10 +283,19 @@ void ClientLayer::OnUpdate(float dt)
     }
 
     {
-        ImGui::Begin("Console output");
+        ImGui::Begin("Custom request");
         ImGui::AlignTextToFramePadding();
 
         ImGui::TextWrapped(m_ConsoleText.c_str());
+
+        ImGui::End();
+    }
+
+    {
+        ImGui::Begin("Custom data");
+        ImGui::AlignTextToFramePadding();
+        ImGui::Checkbox("Use custom request data", &m_UseCustomRequestBody);
+        ImGui::InputTextMultiline("Input data", m_CustomRequestBody.data(), 512);
 
         ImGui::End();
     }
