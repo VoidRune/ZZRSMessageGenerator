@@ -278,8 +278,49 @@ void ClientLayer::OnUpdate(float dt)
         }
 
         ImGui::Text(m_TimeTaken.c_str());
+        ImGui::Checkbox("Send continuously over one second", &m_SendContinuously);
 
         ImGui::End();
+    }
+
+    if (m_SendContinuously)
+    {
+        std::string requestTemplate =
+            "POST /report HTTP/1.1\r\n"
+            "Host: example.com\r\n"
+            "Content-Type: application/x-www-form-urlencoded\r\n"
+            "\r\n";
+
+        m_AccumulatedRequestNumber += m_RequestCount * dt;
+        uint32_t overTimeNumber = std::floor(m_AccumulatedRequestNumber); 
+        m_AccumulatedRequestNumber -= overTimeNumber;
+        //std::cout << overTimeNumber << std::endl;
+        for (auto& g : g_Generators)
+        {
+            for (size_t i = 0; i < overTimeNumber; i++)
+            {
+                std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Float());
+                //std::string send = requestTemplate + std::to_string(dataString.size() - 4) + "\r\n\r\n" + dataString;
+                std::string send = requestTemplate + dataString;
+
+                if (m_UseCustomRequestBody)
+                    asio::write(g.Socket, asio::buffer(m_CustomRequestBody.data(), m_CustomRequestBody.size()), g_Ec);
+                else
+                    asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
+                //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
+
+                if (g_Ec)
+                {
+                    std::cout << g_Ec.message() << std::endl;
+                }
+            }
+            //g.Flush();
+
+            if (g_Ec)
+            {
+                m_ConsoleText = g_Ec.message();
+            }
+        }
     }
 
     {

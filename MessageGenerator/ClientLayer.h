@@ -17,6 +17,8 @@ private:
 	std::string m_ConsoleText = "";
 	bool m_FlushPeriodically = false;
 	int32_t m_RequestCount = 1;
+	bool m_SendContinuously = false;
+	float m_AccumulatedRequestNumber = 0.0f;
 	bool m_UseCustomRequestBody = false;
 	std::string m_CustomRequestBody = "Hello world!";
 	std::string m_TimeTaken = "Time taken: 0";
