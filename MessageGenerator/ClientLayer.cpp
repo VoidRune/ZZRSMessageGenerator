@@ -93,6 +93,20 @@ void ClientLayer::OnAttach()
         "\r\n"
         "id=1&timestamp=2&value=3";
 
+    m_CustomRequestBody =
+        "POST /report HTTP/1.1\r\n"
+        "User - Agent: PostmanRuntime / 7.37.0\r\n"
+        "Accept : */*\r\n"
+        "Cache-Control: no-cache\r\n"
+        "Postman-Token: 2c470340-c2a2-4794-b11c-a93ec979bf88\r\n"
+        "Host: localhost:8080\r\n"
+        "Accept-Encoding: gzip, deflate, br\r\n"
+        "Connection: keep-alive\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "Content-Length: 24\r\n"
+        "\r\n"
+        "id=1&timestep=5&value=12";
+
     g_ContextThread = std::thread([&]() { g_Context.run(); });
 }
 
@@ -215,25 +229,26 @@ void ClientLayer::OnUpdate(float dt)
             //    "id=1&timestep=2&value=3\r\n\r\n";
 
 
+            std::string requestTemplate =
+                "POST /report HTTP/1.1\r\n"
+                "Host: localhost:12345\r\n"
+                "Connection: keep-alive\r\n"
+                "Content-Type: application/x-www-form-urlencoded\r\n"
+                "Content-Length: ";
+
             //std::string requestTemplate =
             //    "POST /report HTTP/1.1\r\n"
             //    "Host: example.com\r\n"
             //    "Content-Type: application/x-www-form-urlencoded\r\n"
-            //    "Content-Length: ";
-
-            std::string requestTemplate =
-                "POST /report HTTP/1.1\r\n"
-                "Host: example.com\r\n"
-                "Content-Type: application/x-www-form-urlencoded\r\n"
-                "\r\n";
+            //    "\r\n";
 
             for (auto& g : g_Generators)
             {
                 for (size_t i = 0; i < m_RequestCount; i++)
                 {
-                    std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Float());
-                    //std::string send = requestTemplate + std::to_string(dataString.size() - 4) + "\r\n\r\n" + dataString;
-                    std::string send = requestTemplate + dataString;
+                    std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(i) + "&value=" + std::to_string(Random::Lehmer32());
+                    std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
+                    //std::string send = requestTemplate + dataString;
 
                     if (m_UseCustomRequestBody)
                         asio::write(g.Socket, asio::buffer(m_CustomRequestBody.data(), m_CustomRequestBody.size()), g_Ec);
@@ -285,11 +300,20 @@ void ClientLayer::OnUpdate(float dt)
 
     if (m_SendContinuously)
     {
-        std::string requestTemplate =
+        std::string requestTemplate = 
             "POST /report HTTP/1.1\r\n"
-            "Host: example.com\r\n"
+            "User - Agent: PostmanRuntime / 7.37.0\r\n"
+            "Accept : */*\r\n"
+            "Cache-Control: no-cache\r\n"
+            "Postman-Token: 2c470340-c2a2-4794-b11c-a93ec979bf88\r\n"
+            "Host: localhost:8080\r\n"
+            "Accept-Encoding: gzip, deflate, br\r\n"
+            "Connection: keep-alive\r\n"
             "Content-Type: application/x-www-form-urlencoded\r\n"
-            "\r\n";
+            "Content-Length: 24\r\n"
+            "\r\n"
+            "id=1&timestep=5&value=12";
+        
 
         m_AccumulatedRequestNumber += m_RequestCount * dt;
         uint32_t overTimeNumber = std::floor(m_AccumulatedRequestNumber); 
@@ -336,7 +360,7 @@ void ClientLayer::OnUpdate(float dt)
         ImGui::Begin("Custom data");
         ImGui::AlignTextToFramePadding();
         ImGui::Checkbox("Use custom request data", &m_UseCustomRequestBody);
-        ImGui::InputTextMultiline("Input data", m_CustomRequestBody.data(), 512);
+        ImGui::InputTextMultiline("Input data", m_CustomRequestBody.data(), 4096);
 
         ImGui::End();
     }
