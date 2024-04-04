@@ -32,18 +32,13 @@ public:
 
     }
 
-    //~Generator()
-    //{
-    //    Socket.close();
-    //}
-
     bool Connect(std::string addr, int32_t port)
     {
         asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(addr, g_Ec), port);
         Socket.connect(endpoint, g_Ec);
         if (!g_Ec)
         {
-            std::cout << "Connected!" << std::endl;
+            std::cout << "Connected generator with id: " << Id << std::endl;
             return true;
         }
         std::cout << "Failed to connect!" << std::endl;
@@ -226,6 +221,10 @@ void ClientLayer::OnUpdate(float dt)
 
         if (ImGui::Button("Clear generators"))
         {
+            for (auto& g : g_Generators)
+            {
+                g.Socket.close();
+            }
             g_Generators.clear();
         }
 
