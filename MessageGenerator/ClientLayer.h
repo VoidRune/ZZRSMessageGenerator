@@ -11,6 +11,8 @@ public:
 	virtual void OnUpdate(float dt) override;
 private:
 
+	void SendData(int amountPerGenerator);
+
 	int32_t m_ConnectGeneratorCount = 1;
 	std::string m_Address = "93.184.216.34";
 	int32_t m_Port = 80;
@@ -19,7 +21,5 @@ private:
 	int32_t m_RequestCount = 1;
 	bool m_SendContinuously = false;
 	float m_AccumulatedRequestNumber = 0.0f;
-	bool m_UseCustomRequestBody = false;
-	std::string m_CustomRequestBody = "Hello world!";
 	std::string m_TimeTaken = "Time taken: 0";
 };

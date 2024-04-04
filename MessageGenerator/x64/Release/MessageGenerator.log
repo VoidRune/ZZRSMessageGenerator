@@ -1,11 +1,11 @@
 ﻿  ClientLayer.cpp
 D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(38,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
 D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(40,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(148,50): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(319,33): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(127,24): warning C4244: '=': conversion from 'time_t' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(261,33): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
   Generating code
-  1 of 3240 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+  2 of 3236 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
     42 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   MessageGenerator.vcxproj -> D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\x64\Release\MessageGenerator.exe
