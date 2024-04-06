@@ -82,7 +82,7 @@ std::vector<Generator> g_Generators;
 
 void ClientLayer::SendData(int amountPerGenerator)
 {
-    std::string requestTemplate =
+    static std::string requestTemplate =
         "POST /report HTTP/1.1\r\n"
         "Host: localhost:12345\r\n"
         "Accept: */*\r\n"
@@ -95,7 +95,16 @@ void ClientLayer::SendData(int amountPerGenerator)
     {
         for (size_t i = 0; i < amountPerGenerator; i++)
         {
-            std::string dataString = "id=" + std::to_string(g.Id) + "&timestamp=" + std::to_string(g.MessageId + i) + "&value=" + std::to_string(Random::Lehmer32());
+            auto now = std::chrono::system_clock::now();
+            auto midnight = std::chrono::duration_cast<std::chrono::microseconds>(
+                now.time_since_epoch() % std::chrono::hours(24)
+                );
+
+            std::string dataString = 
+                  "id=" + std::to_string(g.Id)
+                + "&count=" + std::to_string(g.MessageId + i)
+                + "&timestamp=" + std::to_string(midnight.count())
+                + "&value=" + std::to_string(Random::Lehmer32());
             std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
             //std::string send = requestTemplate + dataString;
 
