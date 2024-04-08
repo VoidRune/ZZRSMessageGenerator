@@ -75,6 +75,7 @@ public:
 
     uint32_t Id;
     uint32_t MessageId = 0;
+    float RandomValue = 0.0f;
     asio::ip::tcp::socket Socket;
 };
 
@@ -99,12 +100,13 @@ void ClientLayer::SendData(int amountPerGenerator)
             auto midnight = std::chrono::duration_cast<std::chrono::microseconds>(
                 now.time_since_epoch() % std::chrono::hours(24)
                 );
-
+            g.RandomValue += Random::Float();
             std::string dataString = 
                   "id=" + std::to_string(g.Id)
                 + "&count=" + std::to_string(g.MessageId + i)
                 + "&timestamp=" + std::to_string(midnight.count())
-                + "&value=" + std::to_string(Random::Lehmer32());
+                + "&value=" + std::to_string(g.RandomValue);
+            //std::cout << dataString << std::endl;
             std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
             //std::string send = requestTemplate + dataString;
 
