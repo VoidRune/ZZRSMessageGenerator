@@ -25,11 +25,14 @@ std::vector<char> g_FlushBuffer(20 * 1024);
 class Generator
 {
 public:
-    Generator(uint32_t id) :
-        Id(id),
+    Generator(std::vector<uint32_t> ids) :
+        Ids(ids),
         Socket(g_Context)
     {
-
+        for (size_t i = 0; i < ids.size(); i++)
+        {
+            RandomValues.push_back(0.0f);
+        }
     }
 
     bool Connect(std::string addr, int32_t port)
@@ -38,7 +41,12 @@ public:
         Socket.connect(endpoint, g_Ec);
         if (!g_Ec)
         {
-            std::cout << "Connected generator with id: " << Id << std::endl;
+            std::cout << "Connected generator with ids: ";
+            for (auto id : Ids)
+            {
+                std::cout << " " << id;
+            }
+            std::cout << std::endl;
             return true;
         }
         std::cout << "Failed to connect!" << std::endl;
@@ -73,9 +81,9 @@ public:
         //    });
     }
 
-    uint32_t Id;
+    std::vector<uint32_t> Ids;
     uint32_t MessageId = 0;
-    float RandomValue = 0.0f;
+    std::vector<float> RandomValues;
     asio::ip::tcp::socket Socket;
 };
 
@@ -96,26 +104,30 @@ void ClientLayer::SendData(int amountPerGenerator)
     {
         for (size_t i = 0; i < amountPerGenerator; i++)
         {
-            auto now = std::chrono::system_clock::now();
-            auto midnight = std::chrono::duration_cast<std::chrono::milliseconds>(
-                now.time_since_epoch() % std::chrono::hours(24)
-                );
-            g.RandomValue += Random::Float();
-            std::string dataString = 
-                  "id=" + std::to_string(g.Id)
-                + "&count=" + std::to_string(g.MessageId + i)
-                + "&timestamp=" + std::to_string(midnight.count())
-                + "&value=" + std::to_string(g.RandomValue);
-            //std::cout << dataString << std::endl;
-            std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
-            //std::string send = requestTemplate + dataString;
-
-            asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
-            //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
-
-            if (g_Ec)
+            for (int j = 0; j < g.Ids.size(); j++)
             {
-                std::cout << g_Ec.message() << std::endl;
+
+                auto now = std::chrono::system_clock::now();
+                auto midnight = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    now.time_since_epoch() % std::chrono::hours(24)
+                    );
+                g.RandomValues[j] += Random::Float();
+                std::string dataString =
+                    "id=" + std::to_string(g.Ids[j])
+                    + "&count=" + std::to_string(g.MessageId + i)
+                    + "&timestamp=" + std::to_string(midnight.count())
+                    + "&value=" + std::to_string(g.RandomValues[j]);
+                //std::cout << dataString << std::endl;
+                std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
+                //std::string send = requestTemplate + dataString;
+
+                asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
+                //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
+
+                if (g_Ec)
+                {
+                    std::cout << g_Ec.message() << std::endl;
+                }
             }
         }
         g.MessageId += amountPerGenerator;
@@ -155,7 +167,6 @@ void ClientLayer::OnUpdate(float dt)
         ImGui::Begin("Generator settings");
         ImGui::AlignTextToFramePadding();
 
-
         ImGui::InputTextWithHint("Request address", "http://httpbin.org/", m_Address.data(), 1024);
         ImGui::InputInt("Port", &m_Port);
         //ImGui::InputTextWithHint("Message body", "body", m_MessageBody.data(), 1024);
@@ -165,16 +176,23 @@ void ClientLayer::OnUpdate(float dt)
         ImGui::Text(temp.c_str());
 
         ImGui::InputInt("Generator start id", &m_GeneratorStartId);
+        ImGui::InputInt("Simulate number per generator", &m_IdsPerGenerator);
 
         ImGui::InputInt("Generator count", &m_ConnectGeneratorCount);
         if (ImGui::Button("Connect generator"))
         {
             bool hasFailed = false;
 
-            for (size_t i = 0; i < m_ConnectGeneratorCount; i++)
+            for (size_t i = 0; i < m_ConnectGeneratorCount * m_IdsPerGenerator; i += m_IdsPerGenerator)
             {
-                uint32_t id = m_GeneratorStartId + i;
-                Generator gen(id);
+                std::vector<uint32_t> ids;
+                for (size_t j = 0; j < m_IdsPerGenerator; j++)
+                {
+                    ids.push_back(i + j + m_GeneratorStartId);
+                }
+
+                //uint32_t id = m_GeneratorStartId + i;
+                Generator gen(ids);
                 if (gen.Connect(m_Address, m_Port))
                 {
                     g_Generators.push_back(std::move(gen));
