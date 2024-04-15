@@ -14,8 +14,9 @@ private:
 	void SendData(int amountPerGenerator);
 
 	int32_t m_ConnectGeneratorCount = 1;
-	std::string m_Address = "93.184.216.34";
-	int32_t m_Port = 80;
+	std::string m_Address = "127.0.0.1";
+	int32_t m_Port = 8080;
+	int32_t m_GeneratorStartId = 0;
 	std::string m_ConsoleText = "";
 	bool m_FlushPeriodically = false;
 	int32_t m_RequestCount = 1;

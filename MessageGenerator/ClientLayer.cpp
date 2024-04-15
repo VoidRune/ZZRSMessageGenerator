@@ -97,7 +97,7 @@ void ClientLayer::SendData(int amountPerGenerator)
         for (size_t i = 0; i < amountPerGenerator; i++)
         {
             auto now = std::chrono::system_clock::now();
-            auto midnight = std::chrono::duration_cast<std::chrono::microseconds>(
+            auto midnight = std::chrono::duration_cast<std::chrono::milliseconds>(
                 now.time_since_epoch() % std::chrono::hours(24)
                 );
             g.RandomValue += Random::Float();
@@ -164,6 +164,8 @@ void ClientLayer::OnUpdate(float dt)
         auto temp = std::string("Generators open: ") + std::to_string(g_Generators.size());
         ImGui::Text(temp.c_str());
 
+        ImGui::InputInt("Generator start id", &m_GeneratorStartId);
+
         ImGui::InputInt("Generator count", &m_ConnectGeneratorCount);
         if (ImGui::Button("Connect generator"))
         {
@@ -171,7 +173,7 @@ void ClientLayer::OnUpdate(float dt)
 
             for (size_t i = 0; i < m_ConnectGeneratorCount; i++)
             {
-                uint32_t id = Random::Lehmer32();
+                uint32_t id = m_GeneratorStartId + i;
                 Generator gen(id);
                 if (gen.Connect(m_Address, m_Port))
                 {
