@@ -1,16 +1,19 @@
 ﻿  ClientLayer.cpp
 D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(38,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
 D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\Random.h(40,15): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(145,24): warning C4244: '=': conversion from 'time_t' to 'uint32_t', possible loss of data
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(191,61): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(146,53): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
           with
           [
               _Ty=std::seed_seq::result_type
           ]
-D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(291,33): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(158,24): warning C4244: '=': conversion from 'time_t' to 'uint32_t', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(216,38): warning C4305: '=': truncation from 'double' to 'float'
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(219,57): warning C4244: 'argument': conversion from 'int32_t' to 'const float', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(219,35): warning C4244: 'argument': conversion from 'int32_t' to 'const float', possible loss of data
+D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\MessageGenerator\ClientLayer.cpp(342,33): warning C4244: 'initializing': conversion from 'float' to 'uint32_t', possible loss of data
   Generating code
-  78 of 3371 functions ( 2.3%) were compiled, the rest were copied from previous compilation.
-    49 functions were new in current compilation
-    108 functions had inline decision re-evaluated but remain unchanged
+  1 of 3398 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    41 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   MessageGenerator.vcxproj -> D:\Faks\3.Letnik_2.Semester\ZZRS\MessageGenerator\x64\Release\MessageGenerator.exe

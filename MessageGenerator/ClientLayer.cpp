@@ -25,14 +25,10 @@ std::vector<char> g_FlushBuffer(20 * 1024);
 class Generator
 {
 public:
-    Generator(std::vector<uint32_t> ids) :
-        Ids(ids),
+    Generator():
         Socket(g_Context)
     {
-        for (size_t i = 0; i < ids.size(); i++)
-        {
-            RandomValues.push_back(0.0f);
-        }
+
     }
 
     bool Connect(std::string addr, int32_t port)
@@ -41,12 +37,7 @@ public:
         Socket.connect(endpoint, g_Ec);
         if (!g_Ec)
         {
-            std::cout << "Connected generator with ids: ";
-            for (auto id : Ids)
-            {
-                std::cout << " " << id;
-            }
-            std::cout << std::endl;
+            std::cout << "Connected generator!" << std::endl;
             return true;
         }
         std::cout << "Failed to connect!" << std::endl;
@@ -82,7 +73,7 @@ public:
     }
 
     std::vector<uint32_t> Ids;
-    uint32_t MessageId = 0;
+    std::vector<uint32_t> MessageIds;
     std::vector<float> RandomValues;
     asio::ip::tcp::socket Socket;
 };
@@ -91,6 +82,9 @@ std::vector<Generator> g_Generators;
 
 void ClientLayer::SendData(int amountPerGenerator)
 {
+    if (amountPerGenerator == 0)
+        return;
+
     static std::string requestTemplate =
         "POST /report HTTP/1.1\r\n"
         "Host: localhost:12345\r\n"
@@ -114,7 +108,7 @@ void ClientLayer::SendData(int amountPerGenerator)
                 g.RandomValues[j] += Random::Float();
                 std::string dataString =
                     "id=" + std::to_string(g.Ids[j])
-                    + "&count=" + std::to_string(g.MessageId + i)
+                    + "&count=" + std::to_string(g.MessageIds[j] + i)
                     + "&timestamp=" + std::to_string(midnight.count())
                     + "&value=" + std::to_string(g.RandomValues[j]);
                 //std::cout << dataString << std::endl;
@@ -130,13 +124,32 @@ void ClientLayer::SendData(int amountPerGenerator)
                 }
             }
         }
-        g.MessageId += amountPerGenerator;
-        //g.Flush();
+        for (auto& mId : g.MessageIds)
+        {
+            mId += amountPerGenerator;
+        }
 
         if (g_Ec)
         {
             m_ConsoleText = g_Ec.message();
         }
+    }
+}
+
+void ClientLayer::UpdateIds(int idsPerGenerator)
+{
+    for (size_t i = 0; i < g_Generators.size() * idsPerGenerator; i += idsPerGenerator)
+    {
+        std::vector<uint32_t> ids;
+        for (size_t j = 0; j < idsPerGenerator; j++)
+        {
+            ids.push_back(i + j + m_GeneratorStartId);
+        }
+
+        Generator& gen = g_Generators[i / idsPerGenerator];
+        gen.Ids = ids;
+        gen.MessageIds.resize(ids.size());
+        gen.RandomValues.resize(ids.size());
     }
 }
 
@@ -169,30 +182,65 @@ void ClientLayer::OnUpdate(float dt)
 
         ImGui::InputTextWithHint("Request address", "http://httpbin.org/", m_Address.data(), 1024);
         ImGui::InputInt("Port", &m_Port);
-        //ImGui::InputTextWithHint("Message body", "body", m_MessageBody.data(), 1024);
-        //ImGui::Text(m_TimeTaken.c_str());
+
+        ImGui::Separator();
+
+        ImGui::InputInt("Generator start id", &m_GeneratorStartId);
+
+        ImGui::InputInt("Min Ids", &m_MinIdsPerGenerator);
+        //ImGui::SameLine();
+        ImGui::InputInt("Max Ids", &m_MaxIdsPerGenerator);
+        ImGui::InputFloat("Time(minutes): Min -> Max", &m_TimeTakenToMaxId);
+
+        if(m_IsTimerRunning)
+            m_CurrentTimeTaken += dt / 60.0f;
+
+        if (ImGui::Button("Start"))
+        {
+            m_IsTimerRunning = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+        {
+            m_IsTimerRunning = false;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset"))
+        {
+            m_CurrentTimeTaken = 0.0f;
+        }
+        if (m_CurrentTimeTaken > m_TimeTakenToMaxId)
+            m_CurrentTimeTaken = m_TimeTakenToMaxId;
+
+        if (m_TimeTakenToMaxId < 0.05)
+            m_TimeTakenToMaxId = 0.05;
+
+        float r = m_CurrentTimeTaken / m_TimeTakenToMaxId;
+        int curr = (int)std::lerp(m_MinIdsPerGenerator, m_MaxIdsPerGenerator, r);
+        if (curr != m_CurrentIdsPerGenerator)
+        {
+            m_CurrentIdsPerGenerator = curr;
+            UpdateIds(m_CurrentIdsPerGenerator);
+            //std::cout << "Updated " << m_CurrentIdsPerGenerator << std::endl;
+            m_ConsoleText = "Updating ids per generator: " + std::to_string(m_CurrentIdsPerGenerator);
+        }
+
+        ImGui::SameLine();
+        ImGui::Text(std::to_string(m_CurrentTimeTaken).c_str());
+
+        ImGui::Separator();
 
         auto temp = std::string("Generators open: ") + std::to_string(g_Generators.size());
         ImGui::Text(temp.c_str());
-
-        ImGui::InputInt("Generator start id", &m_GeneratorStartId);
-        ImGui::InputInt("Simulate number per generator", &m_IdsPerGenerator);
 
         ImGui::InputInt("Generator count", &m_ConnectGeneratorCount);
         if (ImGui::Button("Connect generator"))
         {
             bool hasFailed = false;
 
-            for (size_t i = 0; i < m_ConnectGeneratorCount * m_IdsPerGenerator; i += m_IdsPerGenerator)
+            for (size_t i = 0; i < m_ConnectGeneratorCount * m_CurrentIdsPerGenerator; i += m_CurrentIdsPerGenerator)
             {
-                std::vector<uint32_t> ids;
-                for (size_t j = 0; j < m_IdsPerGenerator; j++)
-                {
-                    ids.push_back(i + j + m_GeneratorStartId);
-                }
-
-                //uint32_t id = m_GeneratorStartId + i;
-                Generator gen(ids);
+                Generator gen;
                 if (gen.Connect(m_Address, m_Port))
                 {
                     g_Generators.push_back(std::move(gen));
@@ -205,8 +253,11 @@ void ClientLayer::OnUpdate(float dt)
                     break;
                 }
             }
-            if(!hasFailed)
+            if (!hasFailed)
+            {
                 m_ConsoleText = std::string("Successfully connected ") + std::to_string(m_ConnectGeneratorCount) + " generators!";
+                UpdateIds(m_CurrentIdsPerGenerator);
+            }
         }
 
         if (ImGui::BeginListBox("Generators"))
