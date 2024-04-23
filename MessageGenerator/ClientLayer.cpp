@@ -14,6 +14,7 @@
 #include <chrono>
 #include <thread>
 #include <execution>
+#include <deque>
 
 asio::error_code g_Ec;
 asio::io_context g_Context;
@@ -72,9 +73,9 @@ public:
         //    });
     }
 
-    std::vector<uint32_t> Ids;
-    std::vector<uint32_t> MessageIds;
-    std::vector<float> RandomValues;
+    std::deque<uint32_t> Ids;
+    std::deque<uint32_t> MessageIds;
+    std::deque<float> RandomValues;
     asio::ip::tcp::socket Socket;
 };
 
@@ -140,7 +141,7 @@ void ClientLayer::UpdateIds(int idsPerGenerator)
 {
     for (size_t i = 0; i < g_Generators.size() * idsPerGenerator; i += idsPerGenerator)
     {
-        std::vector<uint32_t> ids;
+        std::deque<uint32_t> ids;
         for (size_t j = 0; j < idsPerGenerator; j++)
         {
             ids.push_back(i + j + m_GeneratorStartId);
