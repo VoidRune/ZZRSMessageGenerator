@@ -111,7 +111,7 @@ void ClientLayer::SendData(int amountPerGenerator)
                 //g.RandomValues[j] += 0.1f;
                 std::string dataString =
                     //"id=" + std::to_string(g.Ids[j])
-                    "id=" + std::to_string(j)
+                    "id=" + std::to_string(g.startId + j)
                     + "&count=" + std::to_string(g.MessageIds[j] + i)
                     + "&timestamp=" + std::to_string(midnight.count())
                     + "&value=" + std::to_string(g.RandomValues[j]);
