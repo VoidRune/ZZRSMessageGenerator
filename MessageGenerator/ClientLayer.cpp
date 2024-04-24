@@ -73,7 +73,9 @@ public:
         //    });
     }
 
-    std::deque<uint32_t> Ids;
+    //std::deque<uint32_t> Ids;
+    uint32_t startId;
+    uint32_t endId;
     std::deque<uint32_t> MessageIds;
     std::deque<float> RandomValues;
     asio::ip::tcp::socket Socket;
@@ -95,11 +97,10 @@ void ClientLayer::SendData(int amountPerGenerator)
         "Content-Type: application/x-www-form-urlencoded\r\n"
         "Content-Length: ";
 
-    for (auto& g : g_Generators)
-    {
+    std::for_each(std::execution::par, g_Generators.begin(), g_Generators.end(), [&](Generator& g) {
         for (size_t i = 0; i < amountPerGenerator; i++)
         {
-            for (int j = 0; j < g.Ids.size(); j++)
+            for (int j = 0; j < g.endId - g.startId; j++)
             {
 
                 auto now = std::chrono::system_clock::now();
@@ -107,8 +108,10 @@ void ClientLayer::SendData(int amountPerGenerator)
                     now.time_since_epoch() % std::chrono::hours(24)
                     );
                 g.RandomValues[j] += Random::Float();
+                //g.RandomValues[j] += 0.1f;
                 std::string dataString =
-                    "id=" + std::to_string(g.Ids[j])
+                    //"id=" + std::to_string(g.Ids[j])
+                    "id=" + std::to_string(j)
                     + "&count=" + std::to_string(g.MessageIds[j] + i)
                     + "&timestamp=" + std::to_string(midnight.count())
                     + "&value=" + std::to_string(g.RandomValues[j]);
@@ -134,29 +137,31 @@ void ClientLayer::SendData(int amountPerGenerator)
         {
             m_ConsoleText = g_Ec.message();
         }
-    }
+        });
 }
 
 void ClientLayer::UpdateIds(int idsPerGenerator)
 {
     for (size_t i = 0; i < g_Generators.size() * idsPerGenerator; i += idsPerGenerator)
     {
-        std::deque<uint32_t> ids;
-        for (size_t j = 0; j < idsPerGenerator; j++)
-        {
-            ids.push_back(i + j + m_GeneratorStartId);
-        }
+        //std::deque<uint32_t> ids;
+        //for (size_t j = 0; j < idsPerGenerator; j++)
+        //{
+        //    ids.push_back(i + j + m_GeneratorStartId);
+        //}
 
         Generator& gen = g_Generators[i / idsPerGenerator];
-        gen.Ids = ids;
-        gen.MessageIds.resize(ids.size());
-        gen.RandomValues.resize(ids.size());
+        //gen.Ids = ids;
+        gen.startId = i;
+        gen.endId = i + idsPerGenerator;
+        gen.MessageIds.resize(idsPerGenerator);
+        gen.RandomValues.resize(idsPerGenerator);
     }
 }
 
 void ClientLayer::OnAttach()
 {
-    Random::seed = time(nullptr);
+    //Random::seed = time(nullptr);
     g_ContextThread = std::thread([&]() { g_Context.run(); });
 }
 
@@ -354,4 +359,6 @@ void ClientLayer::OnUpdate(float dt)
 
         ImGui::End();
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
