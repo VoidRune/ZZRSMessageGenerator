@@ -18,6 +18,10 @@ private:
 	std::string m_Address = "127.0.0.1";
 	int32_t m_Port = 8080;
 	int32_t m_GeneratorStartId = 0;
+	bool m_TryReconnect = false;
+	int32_t m_LastGeneratorCount = 0;
+	float m_ReconnectTime = 10.0f;
+	float m_CurrentReconnectTimer = 0.0f;
 
 	int32_t m_MinIdsPerGenerator = 1;
 	int32_t m_MaxIdsPerGenerator = 1;

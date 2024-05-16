@@ -112,7 +112,7 @@ void ClientLayer::SendData(int amountPerGenerator)
     //            //g.RandomValues[j] += 0.1f;
     //            std::string dataString =
     //                //"id=" + std::to_string(g.Ids[j])
-    //                "id=" + std::to_string(g.startId + g.GeneratorStartId)
+    //                "id=" + std::to_string(j + g.startId + g.GeneratorStartId)
     //                + "&count=" + std::to_string(g.MessageIds[j] + i)
     //                + "&timestamp=" + std::to_string(midnight.count())
     //                + "&value=" + std::to_string(g.RandomValues[j]);
@@ -122,7 +122,7 @@ void ClientLayer::SendData(int amountPerGenerator)
     //
     //            asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
     //            //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
-    //
+    //            //std::cout << j << std::endl;
     //            if (g_Ec)
     //            {
     //                std::cout << g_Ec.message() << std::endl;
@@ -146,7 +146,7 @@ void ClientLayer::SendData(int amountPerGenerator)
         {
             for (int j = 0; j < g.endId - g.startId; j++)
             {
-
+    
                 auto now = std::chrono::system_clock::now();
                 auto midnight = std::chrono::duration_cast<std::chrono::milliseconds>(
                     now.time_since_epoch() % std::chrono::hours(24)
@@ -162,12 +162,16 @@ void ClientLayer::SendData(int amountPerGenerator)
                 //std::cout << dataString << std::endl;
                 std::string send = requestTemplate + std::to_string(dataString.size()) + "\r\n\r\n" + dataString;
                 //std::string send = requestTemplate + dataString;
-
+    
                 asio::write(g.Socket, asio::buffer(send.data(), send.size()), g_Ec);
                 //g.Socket.write_some(asio::buffer(send.data(), send.size()), g_Ec);
                 //std::cout << j << std::endl;
                 if (g_Ec)
                 {
+                    m_CurrentReconnectTimer = m_ReconnectTime;
+                    m_TryReconnect = true;
+                    std::cout << "Disconnect" << std::endl;
+
                     std::cout << g_Ec.message() << std::endl;
                 }
             }
@@ -176,7 +180,7 @@ void ClientLayer::SendData(int amountPerGenerator)
         {
             mId += amountPerGenerator;
         }
-
+    
         if (g_Ec)
         {
             m_ConsoleText = g_Ec.message();
@@ -218,6 +222,15 @@ void ClientLayer::OnDetach()
 
 void ClientLayer::OnUpdate(float dt)
 {
+    if (m_TryReconnect)
+    {
+        m_CurrentReconnectTimer -= dt;
+        for (auto& g : g_Generators)
+        {
+            g.Socket.close();
+        }
+        g_Generators.clear();
+    }
 
     if (m_FlushPeriodically)
     {
@@ -285,7 +298,7 @@ void ClientLayer::OnUpdate(float dt)
         ImGui::Text(temp.c_str());
 
         ImGui::InputInt("Generator count", &m_ConnectGeneratorCount);
-        if (ImGui::Button("Connect generator"))
+        if (ImGui::Button("Connect generator") || (m_TryReconnect && m_CurrentReconnectTimer <= 0.0f))
         {
             bool hasFailed = false;
 
@@ -306,9 +319,11 @@ void ClientLayer::OnUpdate(float dt)
             }
             if (!hasFailed)
             {
+                m_TryReconnect = false;
                 m_ConsoleText = std::string("Successfully connected ") + std::to_string(m_ConnectGeneratorCount) + " generators!";
                 UpdateIds(m_CurrentIdsPerGenerator);
             }
+            m_LastGeneratorCount = g_Generators.size();
         }
 
         if (ImGui::BeginListBox("Generators"))
@@ -360,6 +375,8 @@ void ClientLayer::OnUpdate(float dt)
             }
             g_Generators.clear();
         }
+
+        ImGui::InputFloat("Reconnect attempt time", &m_ReconnectTime);
 
         ImGui::End();
     }
